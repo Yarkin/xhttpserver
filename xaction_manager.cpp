@@ -16,46 +16,53 @@ namespace top
                 SET_JSON_PROC_RESPONSE(xhttp_error_code::action_not_find)
                 return false;
             }
-            switch(iter->second)
-            {
-                case xhttp_action::account_balance:
-                    return query_balance(json_proc);
-                case xhttp_action::account_info:
-                    return query_account_info(json_proc);
-                case xhttp_action::account_create:
-                    return account_create(json_proc);
-                case xhttp_action::transfer_out:
-                    return transfer_out(json_proc);
-                case xhttp_action::transfer_in:
-                    return transfer_in(json_proc);
-                case xhttp_action::account_history:
-                    return account_history(json_proc);
-                case xhttp_action::account_pending:
-                    return account_pending(json_proc);
-                case xhttp_action::last_digest:
-                    return last_digest(json_proc);
-                case xhttp_action::tps_query:
-                    return tps_query(json_proc);
-                case xhttp_action::set_property:
-                    return set_property(json_proc);
-                case xhttp_action::query_property:
-                    return query_property(json_proc);
-                case xhttp_action::query_all_property:
-                    return query_all_property(json_proc);
-                case xhttp_action::give:
-                    return give(json_proc);
-                case xhttp_action::query_online_tx:
-                    return query_online_tx(json_proc);
-                case xhttp_action::query_reward:
-                    return query_reward(json_proc);
-                case xhttp_action::publish_contract:
-                    return publish_contract(json_proc);
-                case xhttp_action::exec_contract:
-                    return exec_contract(json_proc);
-                default:
-                    xwarn("exception action %d", iter->second);
+            auto iter = m_actions.find(iter->second);
+            if (iter != m_actions.end()) {
+                return iter->second(json_proc);
+            } else {
+                SET_JSON_PROC_RESPONSE(xhttp_error_code::action_not_find)
+                return false;
             }
-            return true;
+            // switch(iter->second)
+            // {
+            //     case xhttp_action::account_balance:
+            //         return query_balance(json_proc);
+            //     case xhttp_action::account_info:
+            //         return query_account_info(json_proc);
+            //     case xhttp_action::account_create:
+            //         return account_create(json_proc);
+            //     case xhttp_action::transfer_out:
+            //         return transfer_out(json_proc);
+            //     case xhttp_action::transfer_in:
+            //         return transfer_in(json_proc);
+            //     case xhttp_action::account_history:
+            //         return account_history(json_proc);
+            //     case xhttp_action::account_pending:
+            //         return account_pending(json_proc);
+            //     case xhttp_action::last_digest:
+            //         return last_digest(json_proc);
+            //     case xhttp_action::tps_query:
+            //         return tps_query(json_proc);
+            //     case xhttp_action::set_property:
+            //         return set_property(json_proc);
+            //     case xhttp_action::query_property:
+            //         return query_property(json_proc);
+            //     case xhttp_action::query_all_property:
+            //         return query_all_property(json_proc);
+            //     case xhttp_action::give:
+            //         return give(json_proc);
+            //     case xhttp_action::query_online_tx:
+            //         return query_online_tx(json_proc);
+            //     case xhttp_action::query_reward:
+            //         return query_reward(json_proc);
+            //     case xhttp_action::publish_contract:
+            //         return publish_contract(json_proc);
+            //     case xhttp_action::exec_contract:
+            //         return exec_contract(json_proc);
+            //     default:
+            //         xwarn("exception action %d", iter->second);
+            // }
+            // return true;
         }
 
 
@@ -571,6 +578,10 @@ namespace top
             }
             SET_JSON_PROC_RESPONSE(xhttp_error_code::server_unknown_error)
             return false;
+        }
+        xaction_manager::xaction_manager() {
+            m_store_intf = xsingleton<top::store::xstore_manager>::Instance();
+            m_actions[xhttp_action::account_balance] = std::bind(&xaction_manager::query_balance, this, std::placeholders::_1);
         }
     }
 }

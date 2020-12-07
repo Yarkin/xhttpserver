@@ -17,7 +17,6 @@ namespace top
     namespace httpserver 
     {
 #define TAG_NAME "@name"
-
         static uint64_t get_timestamp()
         {
             struct timeval val;
@@ -31,8 +30,9 @@ namespace top
         class xaction_manager
         {
             public:
-            xaction_manager(){m_store_intf = xsingleton<top::store::xstore_manager>::Instance();}
+            xaction_manager();
             bool do_action(xjson_proc& json_proc);
+            private:
             bool query_balance(xjson_proc& json_proc);
             bool query_account_info(xjson_proc& json_proc);
             bool account_create(xjson_proc& json_proc);
@@ -57,6 +57,9 @@ namespace top
             bool exec_contract(xjson_proc& json_proc);
             public:
             top::store::xstore_base* m_store_intf;
+            private:
+            using xaction_func = std::function<bool(xjson_proc& json_proc)>;
+            std::map<xhttp_action, xaction_func> m_actions;
         };
     }
 }
